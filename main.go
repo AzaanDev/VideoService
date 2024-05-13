@@ -14,8 +14,6 @@ import (
 )
 
 type VideoTitleResponse struct {
-    Host   string   `json:"host"`
-    Port   int      `json:"port"`
 	Titles []string `json:"titles"`
 }
 
@@ -114,8 +112,8 @@ func videoLinkHandler(db *sql.DB) http.HandlerFunc {
                 return
             }
         }
-
-        videoURL := fmt.Sprintf("http://%s/%s", r.Host, videoPath)
+        trimmedVideoPath := strings.TrimPrefix(videoPath, "videos/")
+        videoURL := fmt.Sprintf("http://%s/%s", r.Host, trimmedVideoPath)
 
         resp := VideoResponse{URL: videoURL}
         w.Header().Set("Content-Type", "application/json")
@@ -124,7 +122,7 @@ func videoLinkHandler(db *sql.DB) http.HandlerFunc {
 }
 
 
-func getAllVideosHandler(db *sql.DB, host string, port int) http.HandlerFunc {
+func getAllVideosHandler(db *sql.DB) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         if r.Method != http.MethodGet {
             http.Error(w, "Method not supported", http.StatusMethodNotAllowed)
@@ -150,8 +148,6 @@ func getAllVideosHandler(db *sql.DB, host string, port int) http.HandlerFunc {
 
         response := VideoTitleResponse{
             Titles: titles,
-            Host:   host,
-            Port:   port,
         }
 
         w.Header().Set("Content-Type", "application/json")
@@ -173,11 +169,10 @@ func main() {
 
 	const dir = "videos"
     const port = 8081
-    const host = "localhost"
 
 	http.Handle("/", addHeaders(http.FileServer(http.Dir(dir))))
 	http.HandleFunc("/video", videoLinkHandler(db))
-	http.HandleFunc("/videos", getAllVideosHandler(db, host, port)) 
+	http.HandleFunc("/videos", getAllVideosHandler(db)) 
 
 	fmt.Printf("Starting server on %v\n", port)
 	log.Printf("Serving %s on HTTP port: %v\n", dir, port)
