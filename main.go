@@ -168,7 +168,7 @@ func main() {
     defer db.Close()
 
 	const dir = "videos"
-    const port = 8081
+    const port = 80
 
 	http.Handle("/", addHeaders(http.FileServer(http.Dir(dir))))
 	http.HandleFunc("/video", videoLinkHandler(db))
