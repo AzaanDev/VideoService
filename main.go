@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -47,9 +48,7 @@ func InitDB() *sql.DB {
         }
 
         if filepath.Ext(path) == ".m3u8" {
-            // Remove the .m3u8 extension from the file name for the title
             title := strings.TrimSuffix(info.Name(), ".m3u8")
-            // Convert path to use forward slashes
             normalizedPath := filepath.ToSlash(path)
 
             if !FileExistsByTitle(db, title) {
@@ -100,6 +99,7 @@ func videoLinkHandler(db *sql.DB) http.HandlerFunc {
             http.Error(w, "Missing title in request body", http.StatusBadRequest)
             return
         }
+        fmt.Println(req.Title)
 
         var videoPath string
         err = db.QueryRow("SELECT path FROM videos WHERE title = ?", req.Title).Scan(&videoPath)
@@ -164,12 +164,13 @@ func addHeaders(h http.Handler) http.HandlerFunc {
 }
 
 func main() {
+    var port int
+	flag.IntVar(&port, "port", 8080, "Port number")
+	flag.Parse()
+	const dir = "videos"
+
 	db := InitDB()
     defer db.Close()
-
-	const dir = "videos"
-    const port = 80
-
 	http.Handle("/", addHeaders(http.FileServer(http.Dir(dir))))
 	http.HandleFunc("/video", videoLinkHandler(db))
 	http.HandleFunc("/videos", getAllVideosHandler(db)) 
