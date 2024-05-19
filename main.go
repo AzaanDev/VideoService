@@ -25,6 +25,7 @@ type Video struct {
 
 type VideoRequest struct {
 	Title string `json:"title"`
+    Location string `json:"location"`
 }
 
 type VideoResponse struct {
@@ -95,11 +96,12 @@ func videoLinkHandler(db *sql.DB) http.HandlerFunc {
             http.Error(w, err.Error(), http.StatusBadRequest)
             return
         }
+        defer r.Body.Close()
+
         if req.Title == "" {
             http.Error(w, "Missing title in request body", http.StatusBadRequest)
             return
         }
-        fmt.Println(req.Title)
 
         var videoPath string
         err = db.QueryRow("SELECT path FROM videos WHERE title = ?", req.Title).Scan(&videoPath)
@@ -112,6 +114,7 @@ func videoLinkHandler(db *sql.DB) http.HandlerFunc {
                 return
             }
         }
+
         trimmedVideoPath := strings.TrimPrefix(videoPath, "videos/")
         videoURL := fmt.Sprintf("http://%s/%s", r.Host, trimmedVideoPath)
 
@@ -120,6 +123,7 @@ func videoLinkHandler(db *sql.DB) http.HandlerFunc {
         json.NewEncoder(w).Encode(resp)
     }
 }
+
 
 
 func getAllVideosHandler(db *sql.DB) http.HandlerFunc {
