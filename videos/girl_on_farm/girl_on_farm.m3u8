@@ -1,0 +1,13 @@
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:10
+#EXT-X-MEDIA-SEQUENCE:0
+#EXTINF:10.000000,
+girl_on_farm0.ts
+#EXTINF:10.000000,
+girl_on_farm1.ts
+#EXTINF:10.000000,
+girl_on_farm2.ts
+#EXTINF:2.600000,
+girl_on_farm3.ts
+#EXT-X-ENDLIST
